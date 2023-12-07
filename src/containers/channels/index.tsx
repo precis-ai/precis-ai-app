@@ -7,6 +7,7 @@ import MenuOutlinedIcon from "@mui/icons-material/MenuOutlined";
 import Button from "components/Button";
 import Loader from "components/Loader";
 import { useMergeState } from "utils/custom-hooks";
+import Images from "assets/images";
 
 export default function ChannelsContainer() {
   const navigate = useNavigate();
@@ -66,9 +67,10 @@ export default function ChannelsContainer() {
             <div className="w-1/2">
               <div className="bg-white border-[1px] rounded-lg border-solid border-[#f1f1f1] shadow-md p-5 my-4 flex justify-between items-center">
                 <div className="flex items-center">
-                  <TwitterIcon sx={{ width: 36, height: 36 }} />
+                  {/* <TwitterIcon sx={{ width: 36, height: 36 }} /> */}
+                  <img src={Images.Nihal} className="w-9 h-9 rounded-full" />
                   <div className="ml-4">
-                    <div className="text-lg font-semibold">acme</div>
+                    <div className="text-lg font-semibold">nihal_was_here</div>
                     <div className="text-sm">Twitter</div>
                   </div>{" "}
                 </div>

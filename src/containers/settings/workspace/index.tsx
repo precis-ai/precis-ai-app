@@ -1,3 +1,5 @@
+import React from "react";
+import { useSnackbar } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import Button from "components/Button";
@@ -5,13 +7,22 @@ import TextField from "components/TextField";
 import ErrorMessage from "components/ErrorMessage";
 import { useMergeState } from "utils/custom-hooks";
 import Loader from "components/Loader";
+import { updateWorkspace } from "api";
+import { formatDate } from "utils/date";
 
-export default function WorkspaceSettingsContainer() {
+type Props = {
+  user: any;
+  setUser: (user: any) => void;
+};
+
+export default function WorkspaceSettingsContainer({ user, setUser }: Props) {
+  const { enqueueSnackbar } = useSnackbar();
+
   const [state, setState] = useMergeState({
     isLoading: false,
     shouldEditWorkspaceDetails: false,
 
-    name: "Acme, Inc.",
+    name: "",
 
     errors: {},
   });
@@ -46,11 +57,31 @@ export default function WorkspaceSettingsContainer() {
     return isValid;
   };
 
-  const handleSave = () => {
-    // if (!isFormValid()) {
-    //   return;
-    // }
+  const handleSave = async () => {
+    try {
+      if (!isFormValid()) {
+        return;
+      }
+
+      const response = await updateWorkspace({
+        name: state?.name,
+      });
+
+      if (response?.success) {
+        setState({ shouldEditWorkspaceDetails: false });
+        setUser(response?.data?.user);
+        enqueueSnackbar(response?.message, { variant: "success" });
+      }
+    } catch (error: any) {
+      enqueueSnackbar(error?.message, { variant: "error" });
+    }
   };
+
+  React.useEffect(() => {
+    setState({
+      name: user?.workspace?.name,
+    });
+  }, []);
 
   return (
     <div>
@@ -77,7 +108,9 @@ export default function WorkspaceSettingsContainer() {
               <div className="w-full mt-5">
                 <div className="font-medium">
                   <span>Creation date:</span>
-                  <span className="ml-2">31st October, 2023</span>
+                  <span className="ml-2">
+                    {formatDate(user?.workspace?.createdAt, "LL")}
+                  </span>
                 </div>
 
                 <div className="mt-8">

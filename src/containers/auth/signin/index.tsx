@@ -1,14 +1,19 @@
 import { useNavigate, Link } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import TextField from "components/TextField";
 import ErrorMessage from "components/ErrorMessage";
 import Button from "components/Button";
 import { useMergeState } from "utils/custom-hooks";
+import { signin } from "api";
+import { PRECIS_AI_TOKEN } from "utils/constants";
 
 type Props = {
   setUser: (user: any) => void;
 };
 
 export default function SignInContainer({ setUser }: Props) {
+  const { enqueueSnackbar } = useSnackbar();
+
   const navigate = useNavigate();
 
   const [state, setState] = useMergeState({
@@ -50,9 +55,26 @@ export default function SignInContainer({ setUser }: Props) {
   };
 
   const handleLogin = async () => {
-    // if (!isFormValid()) {
-    //   return;
-    // }
+    try {
+      if (!isFormValid()) {
+        return;
+      }
+
+      const response = await signin({
+        email: state?.email,
+        password: state?.password,
+      });
+
+      if (response?.success) {
+        localStorage.setItem(PRECIS_AI_TOKEN, response?.data?.token);
+
+        setUser(response?.data?.user);
+
+        navigate("/posts");
+      }
+    } catch (error: any) {
+      enqueueSnackbar(error?.message, { variant: "error" });
+    }
   };
 
   return (

@@ -9,16 +9,16 @@ import { useMergeState } from "utils/custom-hooks";
 
 const Channels = [
   {
+    title: "Twitter",
+    icon: TwitterIcon,
+  },
+  {
     title: "Facebook",
     icon: FacebookIcon,
   },
   {
     title: "Instagram",
     icon: InstagramIcon,
-  },
-  {
-    title: "Twitter",
-    icon: TwitterIcon,
   },
   {
     title: "LinkedIn",

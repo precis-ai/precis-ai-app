@@ -1,3 +1,5 @@
+import React from "react";
+import { useSnackbar } from "notistack";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
 import Button from "components/Button";
@@ -5,15 +7,23 @@ import TextField from "components/TextField";
 import ErrorMessage from "components/ErrorMessage";
 import { useMergeState } from "utils/custom-hooks";
 import Loader from "components/Loader";
+import { updateProfile } from "api";
 
-export default function ProfileSettingsContainer() {
+type Props = {
+  user: any;
+  setUser: (user: any) => void;
+};
+
+export default function ProfileSettingsContainer({ user, setUser }: Props) {
+  const { enqueueSnackbar } = useSnackbar();
+
   const [state, setState] = useMergeState({
     isLoading: false,
     shouldEditProfileDetails: false,
 
-    firstName: "Nihal",
-    lastName: "K",
-    email: "nihal.kaul@sjsu.edu",
+    firstName: "",
+    lastName: "",
+    email: "",
 
     errors: {},
   });
@@ -56,11 +66,35 @@ export default function ProfileSettingsContainer() {
     return isValid;
   };
 
-  const handleSave = () => {
-    // if (!isFormValid()) {
-    //   return;
-    // }
+  const handleSave = async () => {
+    try {
+      if (!isFormValid()) {
+        return;
+      }
+
+      const response = await updateProfile({
+        firstName: state?.firstName,
+        lastName: state?.lastName,
+        email: state?.email,
+      });
+
+      if (response?.success) {
+        setState({ shouldEditProfileDetails: false });
+        setUser(response?.data?.user);
+        enqueueSnackbar(response?.message, { variant: "success" });
+      }
+    } catch (error: any) {
+      enqueueSnackbar(error?.message, { variant: "error" });
+    }
   };
+
+  React.useEffect(() => {
+    setState({
+      firstName: user?.firstName,
+      lastName: user?.lastName,
+      email: user?.email,
+    });
+  }, []);
 
   return (
     <div>

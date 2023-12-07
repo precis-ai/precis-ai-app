@@ -39,11 +39,7 @@ export default function RoutesContainer() {
 
   const [state, setState] = useMergeState({
     isLoggedIn: false,
-    user: {
-      _id: "some-id",
-      firstName: "Nihal",
-      lastName: "K",
-    },
+    user: {},
   });
 
   const isAppLoading =
@@ -120,7 +116,12 @@ export default function RoutesContainer() {
                 <Route path="connect" element={<ChannelsConnectContainer />} />
               </Route>
 
-              <Route path="settings" element={<SettingsContainer />} />
+              <Route
+                path="settings"
+                element={
+                  <SettingsContainer user={state?.user} setUser={setUser} />
+                }
+              />
             </Route>
 
             <Route

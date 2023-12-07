@@ -1,17 +1,20 @@
-import { useNavigate, useSearchParams, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useSnackbar } from "notistack";
 import TextField from "components/TextField";
 import ErrorMessage from "components/ErrorMessage";
 import Button from "components/Button";
 import { useMergeState } from "utils/custom-hooks";
+import { signup } from "api";
+import { PRECIS_AI_TOKEN } from "utils/constants";
 
 type Props = {
   setUser: (user: any) => void;
 };
 
 export default function SignupContainer({ setUser }: Props) {
-  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const [state, setState] = useMergeState({
     isLoading: false,
@@ -75,9 +78,29 @@ export default function SignupContainer({ setUser }: Props) {
   };
 
   const handleSignup = async () => {
-    // if (!isFormValid()) {
-    //   return;
-    // }
+    try {
+      if (!isFormValid()) {
+        return;
+      }
+
+      const response = await signup({
+        firstName: state?.firstName,
+        lastName: state?.lastName,
+        email: state?.email,
+        password: state?.password,
+        confirmPassword: state?.confirmPassword,
+      });
+
+      if (response?.success) {
+        localStorage.setItem(PRECIS_AI_TOKEN, response?.data?.token);
+
+        setUser(response?.data?.user);
+
+        navigate("/posts");
+      }
+    } catch (error: any) {
+      enqueueSnackbar(error?.message, { variant: "error" });
+    }
   };
 
   return (

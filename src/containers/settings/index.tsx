@@ -22,7 +22,12 @@ const SETTINGS_TABS = [
   },
 ];
 
-export default function SettingsContainer() {
+type Props = {
+  user: any;
+  setUser: (user: any) => void;
+};
+
+export default function SettingsContainer({ user, setUser }: Props) {
   const [searchParams, setSearchParams] = useSearchParams();
 
   const selectedTabType = searchParams.get("tab");
@@ -84,11 +89,11 @@ export default function SettingsContainer() {
 
       <div className="my-10">
         {state?.selectedTab?.value === SETTINGS_TABS_TYPE.PROFILE && (
-          <ProfileSettingsContainer />
+          <ProfileSettingsContainer user={user} setUser={setUser} />
         )}
 
         {state?.selectedTab?.value === SETTINGS_TABS_TYPE.WORKSPACE && (
-          <WorkspaceSettingsContainer />
+          <WorkspaceSettingsContainer user={user} setUser={setUser} />
         )}
       </div>
     </div>

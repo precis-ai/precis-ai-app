@@ -79,3 +79,77 @@ export const getCurrentUser = async () => {
     return processError(error);
   }
 };
+
+export const updateProfile = async (payload: {
+  firstName: string;
+  lastName: string;
+  email: string;
+}) => {
+  try {
+    const response = await API.put("/users/profile", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const updateWorkspace = async (payload: { name: string }) => {
+  try {
+    const response = await API.put("/users/workspace", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+// ---------- CHANNELS ----------
+
+// ---------- POSTS ----------
+
+export const getPosts = async () => {
+  try {
+    const response = await API.get("/posts", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const summarize = async (payload: { description: string }) => {
+  try {
+    const response = await API.post("/posts/summarize", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const createPost = async (payload: { summary: string }) => {
+  try {
+    const response = await API.post("/posts", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const sendPost = async (payload: { content: string }) => {
+  try {
+    const response = await API.post("/posts/send", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
