@@ -11,6 +11,12 @@ import DefaultLayout from "layouts/default";
 import SignInContainer from "containers/auth/signin";
 import SignUpContainer from "containers/auth/signup";
 
+// Twitter callback
+import AuthTwitterCallbackContainer from "containers/auth/twitter/callback";
+
+// LinkedIn callback
+import AuthLinkedInCallbackContainer from "containers/auth/linkedin/callback";
+
 // posts
 import PostsContainer from "containers/posts";
 import CreatePostContainer from "containers/posts/create";
@@ -95,6 +101,17 @@ export default function RoutesContainer() {
             path="signup"
             element={<SignUpContainer setUser={setUser} />}
           />
+
+          <Route
+            path="auth/twitter/callback"
+            element={<AuthTwitterCallbackContainer />}
+          />
+
+          <Route
+            path="auth/linkedin/callback"
+            element={<AuthLinkedInCallbackContainer />}
+          />
+
           <Route
             path="/"
             element={

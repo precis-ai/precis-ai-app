@@ -106,7 +106,71 @@ export const updateWorkspace = async (payload: { name: string }) => {
   }
 };
 
+// ---------- AUTH ----------
+
+export const twitterGetAuthLink = async () => {
+  try {
+    const response = await API.get("/auth/twitter/link", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const twitterAuthCallback = async (payload: {
+  oauthToken: string;
+  oauthVerifier: string;
+}) => {
+  try {
+    const response = await API.post("/auth/twitter/callback", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const linkedInAuthCallback = async (payload: {
+  code: string;
+  state: string;
+}) => {
+  try {
+    const response = await API.post("/auth/linkedin/callback", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
 // ---------- CHANNELS ----------
+
+export const getChannels = async () => {
+  try {
+    const response = await API.get("/channels", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const disconnectChannel = async (params: { id: string }) => {
+  try {
+    const response = await API.delete("/channels", {
+      params,
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
 
 // ---------- POSTS ----------
 
@@ -143,7 +207,7 @@ export const createPost = async (payload: { summary: string }) => {
   }
 };
 
-export const sendPost = async (payload: { content: string }) => {
+export const sendPost = async (payload: { channels: Array<any> }) => {
   try {
     const response = await API.post("/posts/send", payload, {
       headers: getHeaders(),
