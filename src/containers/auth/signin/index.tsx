@@ -70,7 +70,7 @@ export default function SignInContainer({ setUser }: Props) {
 
         setUser(response?.data?.user);
 
-        navigate("/posts");
+        navigate("/dashboard");
       }
     } catch (error: any) {
       enqueueSnackbar(error?.message, { variant: "error" });

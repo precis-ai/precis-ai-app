@@ -11,6 +11,15 @@ import DefaultLayout from "layouts/default";
 import SignInContainer from "containers/auth/signin";
 import SignUpContainer from "containers/auth/signup";
 
+// onboarding
+import OnboardingContainer from "containers/onboarding";
+
+// dashboard
+import DashboardGettingStartedContainer from "containers/dashboard/getting-started";
+import DashboardOverviewContainer from "containers/dashboard/overview";
+import DashboardMarketingStrategyContainer from "containers/dashboard/marketing-strategy";
+import DashboardMarketingStrategyCreateContainer from "containers/dashboard/marketing-strategy/create";
+
 // Twitter callback
 import AuthTwitterCallbackContainer from "containers/auth/twitter/callback";
 
@@ -25,8 +34,14 @@ import CreatePostContainer from "containers/posts/create";
 import ChannelsContainer from "containers/channels";
 import ChannelsConnectContainer from "containers/channels/connect";
 
+// ai-tools
+import AIToolsContainer from "containers/ai-tools";
+import AIToolsUsageHistoryContainer from "containers/ai-tools/usage-history";
+import AIToolsRunContainer from "containers/ai-tools/run";
+
 // settings
 import SettingsContainer from "containers/settings";
+import TeamSettingsContainer from "containers/settings/team";
 
 // components
 import Loader from "components/Loader";
@@ -112,6 +127,10 @@ export default function RoutesContainer() {
             element={<AuthLinkedInCallbackContainer />}
           />
 
+          <Route element={<ProtectedRoute isLoggedIn={state?.isLoggedIn} />}>
+            <Route path="onboarding" element={<OnboardingContainer />} />
+          </Route>
+
           <Route
             path="/"
             element={
@@ -123,6 +142,33 @@ export default function RoutesContainer() {
             }
           >
             <Route element={<ProtectedRoute isLoggedIn={state?.isLoggedIn} />}>
+              <Route path="dashboard">
+                <Route
+                  path="getting-started"
+                  element={
+                    <DashboardGettingStartedContainer user={state?.user} />
+                  }
+                />
+                <Route
+                  path=""
+                  element={<DashboardOverviewContainer user={state?.user} />}
+                />
+                <Route path="marketing-strategy">
+                  <Route
+                    path=""
+                    element={<DashboardMarketingStrategyContainer />}
+                  />
+                  <Route
+                    path="create"
+                    element={
+                      <DashboardMarketingStrategyCreateContainer
+                        user={state?.user}
+                      />
+                    }
+                  />
+                </Route>
+              </Route>
+
               <Route path="posts">
                 <Route path="" element={<PostsContainer />} />
                 <Route path="create" element={<CreatePostContainer />} />
@@ -133,12 +179,24 @@ export default function RoutesContainer() {
                 <Route path="connect" element={<ChannelsConnectContainer />} />
               </Route>
 
-              <Route
-                path="settings"
-                element={
-                  <SettingsContainer user={state?.user} setUser={setUser} />
-                }
-              />
+              <Route path="ai-tools">
+                <Route path="" element={<AIToolsContainer />} />
+                <Route
+                  path="usage-history"
+                  element={<AIToolsUsageHistoryContainer />}
+                />
+                <Route path="run" element={<AIToolsRunContainer />} />
+              </Route>
+
+              <Route path="settings">
+                <Route
+                  path=""
+                  element={
+                    <SettingsContainer user={state?.user} setUser={setUser} />
+                  }
+                />
+                <Route path="team" element={<TeamSettingsContainer />} />
+              </Route>
             </Route>
 
             <Route

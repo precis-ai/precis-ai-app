@@ -47,6 +47,7 @@ export const signup = async (payload: {
   email: string;
   password: string;
   confirmPassword: string;
+  workspaceId: string | null;
 }) => {
   try {
     const response = await API.post("/users/signup", payload, {
@@ -98,6 +99,84 @@ export const updateProfile = async (payload: {
 export const updateWorkspace = async (payload: { name: string }) => {
   try {
     const response = await API.put("/users/workspace", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const onboard = async (payload: {
+  name: string;
+  content: Array<string>;
+}) => {
+  try {
+    const response = await API.post("/users/onboard", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const listMembers = async () => {
+  try {
+    const response = await API.get("/users/members", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const inviteMember = async (payload: {
+  email: string;
+  role: string;
+}) => {
+  try {
+    const response = await API.post("/users/members", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+// ---------- MARKETING-STRATEGY ----------
+
+export const listMarketingStrategies = async () => {
+  try {
+    const response = await API.get("/marketing-strategy", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const getMarketingStrategyDetails = async (params: { id: string }) => {
+  try {
+    const response = await API.get("/marketing-strategy/details", {
+      params,
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const createMarketingStrategy = async (payload: {
+  name: string;
+  content: Array<string>;
+}) => {
+  try {
+    const response = await API.post("/marketing-strategy", payload, {
       headers: getHeaders(),
     });
     return response.data;
@@ -210,6 +289,65 @@ export const createPost = async (payload: { summary: string }) => {
 export const sendPost = async (payload: { channels: Array<any> }) => {
   try {
     const response = await API.post("/posts/send", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+// ---------- AI TOOLS ----------
+
+export const listAITools = async () => {
+  try {
+    const response = await API.get("/ai-tools", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const getAIToolDetails = async (params: { id: string }) => {
+  try {
+    const response = await API.get("/ai-tools/details", {
+      params,
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const listAIToolsUsageHistory = async () => {
+  try {
+    const response = await API.get("/ai-tools/usage-history", {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const getAIToolsUsageHistoryDetails = async (params: { id: string }) => {
+  try {
+    const response = await API.get("/ai-tools/usage-history/details", {
+      params,
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const runAITool = async (paylaod: { id: string; content: string }) => {
+  try {
+    const response = await API.post("/ai-tools/run", paylaod, {
       headers: getHeaders(),
     });
     return response.data;

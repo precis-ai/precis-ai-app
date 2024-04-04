@@ -63,6 +63,10 @@ export default function ChannelsConnectContainer() {
                     <div className="border border-grey px-5 py-2 rounded-[4px] text-sm">
                       Default
                     </div>
+                  ) : channel?.title === ChannelType.Reddit ? (
+                    <div className="border border-grey px-5 py-2 rounded-[4px] text-sm">
+                      Coming Soon
+                    </div>
                   ) : (
                     <Button
                       label="Connect"

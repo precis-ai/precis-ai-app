@@ -2,8 +2,8 @@ import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
-import ProfileSettingsContainer from "./profile";
-import WorkspaceSettingsContainer from "./workspace";
+import ProfileSettingsContainer from "./general/profile";
+import WorkspaceSettingsContainer from "./general/workspace";
 import { useMergeState } from "utils/custom-hooks";
 
 const SETTINGS_TABS_TYPE = {

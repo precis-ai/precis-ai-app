@@ -6,8 +6,10 @@ import Avatar from "@mui/material/Avatar";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
+import AccountBalanceOutlinedIcon from "@mui/icons-material/AccountBalanceOutlined";
 import SourceOutlinedIcon from "@mui/icons-material/SourceOutlined";
 import WorkspacesOutlinedIcon from "@mui/icons-material/WorkspacesOutlined";
+import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useMergeState } from "utils/custom-hooks";
@@ -15,46 +17,98 @@ import { useMergeState } from "utils/custom-hooks";
 export const NAVS = [
   {
     id: "1",
+    icon: AccountBalanceOutlinedIcon,
+    title: "Dashboard",
+    path: "/dashboard",
+    childNavs: [
+      {
+        id: "11",
+        title: "Getting Started",
+        path: "/getting-started",
+      },
+      {
+        id: "12",
+        title: "Overview",
+        path: "",
+      },
+      {
+        id: "13",
+        title: "Marketing Strategy",
+        path: "/marketing-strategy",
+      },
+    ],
+  },
+  {
+    id: "2",
     icon: SourceOutlinedIcon,
     title: "Posts",
     path: "/posts",
     childNavs: [
       {
-        id: "11",
+        id: "21",
         title: "View Posts",
         path: "",
       },
       {
-        id: "12",
+        id: "22",
         title: "Create Post",
         path: "/create",
       },
     ],
   },
   {
-    id: "2",
+    id: "3",
     icon: WorkspacesOutlinedIcon,
     title: "Channels",
     path: "/channels",
     childNavs: [
       {
-        id: "21",
+        id: "31",
         title: "View Channels",
         path: "",
       },
       {
-        id: "22",
+        id: "32",
         title: "Connect Channel",
         path: "/connect",
       },
     ],
   },
   {
-    id: "3",
+    id: "4",
+    icon: BuildOutlinedIcon,
+    title: "AI Tools",
+    path: "/ai-tools",
+    childNavs: [
+      {
+        id: "41",
+        title: "Overview",
+        path: "",
+      },
+      {
+        id: "42",
+        title: "Usage History",
+        path: "/usage-history",
+      },
+    ],
+  },
+  {
+    id: "5",
     icon: SettingsOutlinedIcon,
     title: "Settings",
     path: "/settings",
-    childNavs: [],
+    childNavs: [
+      {
+        id: "51",
+        title: "General",
+        path: "",
+      },
+      {
+        id: "52",
+        title: "Team",
+        path: "/team",
+      },
+    ],
   },
 ];
 

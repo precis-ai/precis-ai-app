@@ -1,4 +1,4 @@
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import TextField from "components/TextField";
 import ErrorMessage from "components/ErrorMessage";
@@ -6,6 +6,7 @@ import Button from "components/Button";
 import { useMergeState } from "utils/custom-hooks";
 import { signup } from "api";
 import { PRECIS_AI_TOKEN } from "utils/constants";
+import React from "react";
 
 type Props = {
   setUser: (user: any) => void;
@@ -15,6 +16,13 @@ export default function SignupContainer({ setUser }: Props) {
   const { enqueueSnackbar } = useSnackbar();
 
   const navigate = useNavigate();
+
+  const [searchParams] = useSearchParams();
+
+  const workspaceId = searchParams.get("id") || null;
+
+  // not using searchParams because '+' sign in email is being converted to blank space
+  const email = window?.location?.search?.split("&email=")[1] || null;
 
   const [state, setState] = useMergeState({
     isLoading: false,
@@ -89,6 +97,7 @@ export default function SignupContainer({ setUser }: Props) {
         email: state?.email,
         password: state?.password,
         confirmPassword: state?.confirmPassword,
+        workspaceId,
       });
 
       if (response?.success) {
@@ -96,12 +105,26 @@ export default function SignupContainer({ setUser }: Props) {
 
         setUser(response?.data?.user);
 
-        navigate("/posts");
+        if (!workspaceId) {
+          navigate("/onboarding");
+        } else {
+          navigate("/dashboard");
+        }
       }
     } catch (error: any) {
       enqueueSnackbar(error?.message, { variant: "error" });
     }
   };
+
+  React.useEffect(() => {
+    if (!workspaceId || !email) {
+      return;
+    }
+
+    setState({
+      email,
+    });
+  }, []);
 
   return (
     <div className="w-full min-h-screen flex justify-center items-center bg-red-light">
@@ -171,6 +194,7 @@ export default function SignupContainer({ setUser }: Props) {
                   disableAnimation: true,
                 }}
                 autoComplete="off"
+                disabled={!!workspaceId}
               />
 
               {state?.errors?.email && (

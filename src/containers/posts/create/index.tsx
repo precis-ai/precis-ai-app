@@ -170,9 +170,7 @@ export default function CreatePostContainer() {
         </div>
       ) : (
         <div>
-          <div className="md:flex md:justify-between md:items-center">
-            <div className="text-4xl font-semibold text-grey">Create Post</div>
-          </div>
+          <div className="text-4xl font-semibold text-grey">Create Post</div>
 
           <div className="w-full lg:w-3/5 my-8">
             <div>
