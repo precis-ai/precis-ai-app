@@ -94,6 +94,7 @@ export default function CreatePostContainer() {
         setState({
           twitterPost: response?.data?.twitterPost,
           linkedInPost: response?.data?.linkedInPost,
+          redditPost: response?.data?.redditPost,
         });
       }
     } catch (error: any) {
@@ -111,6 +112,7 @@ export default function CreatePostContainer() {
 
       state?.selectedChannels?.forEach((channel: any) => {
         let content = "";
+        let parsedTitle = ""; // only for reddit
 
         if (channel.platform === ChannelType.Twitter) {
           content = state?.twitterPost;
@@ -120,10 +122,24 @@ export default function CreatePostContainer() {
           content = state?.linkedInPost;
         }
 
+        if (channel.platform === ChannelType.Reddit) {
+          const [title, parsedPost] = state.redditPost.split("Post:");
+
+          console.log("title : ", title);
+
+          [, parsedTitle] = title.split("Title: ");
+
+          console.log("parsedTitle : ", parsedTitle);
+          console.log("parsedPost : ", parsedPost);
+
+          content = parsedPost;
+        }
+
         channels.push({
           id: channel.id,
           content,
           platform: channel.platform,
+          title: parsedTitle,
         });
       });
 
@@ -131,10 +147,10 @@ export default function CreatePostContainer() {
 
       const response = await sendPost({ channels });
 
-      if (response?.success) {
-        enqueueSnackbar(response?.message, { variant: "success" });
-        navigate("/posts");
-      }
+      // if (response?.success) {
+      //   enqueueSnackbar(response?.message, { variant: "success" });
+      //   navigate("/posts");
+      // }
     } catch (error: any) {
       enqueueSnackbar(error?.message, { variant: "error" });
     } finally {
@@ -285,6 +301,16 @@ export default function CreatePostContainer() {
                         <div className="mt-4 w-full">
                           <textarea
                             value={state?.linkedInPost}
+                            className="w-full"
+                            rows={10}
+                          />
+                        </div>
+                      )}
+
+                      {channel?.platform === ChannelType.Reddit && (
+                        <div className="mt-4 w-full">
+                          <textarea
+                            value={state?.redditPost}
                             className="w-full"
                             rows={10}
                           />

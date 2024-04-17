@@ -25,19 +25,19 @@ export const Channels = [
     icon: TwitterIcon,
   },
   {
-    title: ChannelType.Facebook,
-    icon: FacebookIcon,
-  },
-  {
-    title: ChannelType.Instagram,
-    icon: InstagramIcon,
-  },
-  {
     title: ChannelType.LinkedIn,
     icon: LinkedInIcon,
   },
   {
     title: ChannelType.Reddit,
     icon: RedditIcon,
+  },
+  {
+    title: ChannelType.Facebook,
+    icon: FacebookIcon,
+  },
+  {
+    title: ChannelType.Instagram,
+    icon: InstagramIcon,
   },
 ];
