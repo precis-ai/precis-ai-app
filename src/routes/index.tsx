@@ -11,6 +11,15 @@ import DefaultLayout from "layouts/default";
 import SignInContainer from "containers/auth/signin";
 import SignUpContainer from "containers/auth/signup";
 
+// Twitter callback
+import AuthTwitterCallbackContainer from "containers/auth/twitter/callback";
+
+// LinkedIn callback
+import AuthLinkedInCallbackContainer from "containers/auth/linkedin/callback";
+
+// Reddit callback
+import AuthRedditCallbackContainer from "containers/auth/reddit/callback";
+
 // onboarding
 import OnboardingContainer from "containers/onboarding";
 
@@ -19,12 +28,6 @@ import DashboardGettingStartedContainer from "containers/dashboard/getting-start
 import DashboardOverviewContainer from "containers/dashboard/overview";
 import DashboardMarketingStrategyContainer from "containers/dashboard/marketing-strategy";
 import DashboardMarketingStrategyCreateContainer from "containers/dashboard/marketing-strategy/create";
-
-// Twitter callback
-import AuthTwitterCallbackContainer from "containers/auth/twitter/callback";
-
-// LinkedIn callback
-import AuthLinkedInCallbackContainer from "containers/auth/linkedin/callback";
 
 // posts
 import PostsContainer from "containers/posts";
@@ -125,6 +128,11 @@ export default function RoutesContainer() {
           <Route
             path="auth/linkedin/callback"
             element={<AuthLinkedInCallbackContainer />}
+          />
+
+          <Route
+            path="auth/reddit/callback"
+            element={<AuthRedditCallbackContainer />}
           />
 
           <Route element={<ProtectedRoute isLoggedIn={state?.isLoggedIn} />}>

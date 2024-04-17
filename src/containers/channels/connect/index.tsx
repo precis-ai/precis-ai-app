@@ -27,6 +27,10 @@ export default function ChannelsConnectContainer() {
         process.env.REACT_APP_LINKEDIN_CALLBACK_URI || ""
       )}&state=precis_ai_state&scope=openid%20profile%20w_member_social`;
     }
+
+    if (channel === ChannelType.Reddit) {
+      window.location.href = `https://www.reddit.com/api/v1/authorize?client_id=${process.env.REACT_APP_REDDIT_CLIENT_ID}&response_type=code&redirect_uri=${process.env.REACT_APP_REDDIT_CALLBACK_URI}&duration=permanent&state=precis_ai_state&scope=identity%20submit`;
+    }
   };
 
   return (
@@ -62,10 +66,6 @@ export default function ChannelsConnectContainer() {
                   ) ? (
                     <div className="border border-grey px-5 py-2 rounded-[4px] text-sm">
                       Default
-                    </div>
-                  ) : channel?.title === ChannelType.Reddit ? (
-                    <div className="border border-grey px-5 py-2 rounded-[4px] text-sm">
-                      Coming Soon
                     </div>
                   ) : (
                     <Button

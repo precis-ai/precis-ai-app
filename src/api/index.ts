@@ -226,6 +226,20 @@ export const linkedInAuthCallback = async (payload: {
   }
 };
 
+export const redditAuthCallback = async (payload: {
+  code: string;
+  state: string;
+}) => {
+  try {
+    const response = await API.post("/auth/reddit/callback", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
 // ---------- CHANNELS ----------
 
 export const getChannels = async () => {
