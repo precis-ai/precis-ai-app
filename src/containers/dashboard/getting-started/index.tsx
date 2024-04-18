@@ -169,7 +169,7 @@ export default function DashboardGettingStartedContainer({ user }: Props) {
             </Link>
 
             <Link
-              to="/posts/schedule"
+              to="/posts/create"
               className="flex justify-between items-center p-2 cursor-pointer hover:shadow-md my-4"
             >
               <div className="flex items-center">
