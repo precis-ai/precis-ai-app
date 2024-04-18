@@ -311,6 +311,20 @@ export const sendPost = async (payload: { channels: Array<any> }) => {
   }
 };
 
+export const schedulePost = async (payload: {
+  channels: Array<any>;
+  timestamp: any;
+}) => {
+  try {
+    const response = await API.post("/posts/schedule", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
 // ---------- AI TOOLS ----------
 
 export const listAITools = async () => {

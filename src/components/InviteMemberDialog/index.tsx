@@ -28,11 +28,7 @@ export const userRolesList = [
   },
 ];
 
-export default function MerchantInviteMemberDialog({
-  open,
-  onClose,
-  onSubmit,
-}: Props) {
+export default function InviteMemberDialog({ open, onClose, onSubmit }: Props) {
   const [state, setState] = useMergeState({
     email: "",
     role: "",

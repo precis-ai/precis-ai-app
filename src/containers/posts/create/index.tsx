@@ -7,8 +7,15 @@ import TextField from "components/TextField";
 import Button from "components/Button";
 import ErrorMessage from "components/ErrorMessage";
 import Loader from "components/Loader";
+import PostDialog from "components/PostDialog";
 import { useMergeState } from "utils/custom-hooks";
-import { createPost, getChannels, sendPost, summarize } from "api";
+import {
+  createPost,
+  getChannels,
+  schedulePost,
+  sendPost,
+  summarize,
+} from "api";
 import { ChannelType, Channels } from "utils/constants";
 
 export default function CreatePostContainer() {
@@ -39,6 +46,8 @@ export default function CreatePostContainer() {
     isSendingPost: false,
 
     shouldShowPost: false,
+
+    shouldShowPostDialog: false,
 
     errors: {},
   });
@@ -104,8 +113,18 @@ export default function CreatePostContainer() {
     }
   };
 
-  const handleSendPost = async () => {
+  const handleOpenPostDialog = () => {
+    setState({ shouldShowPostDialog: true });
+  };
+
+  const handleClosePostDialog = () => {
+    setState({ shouldShowPostDialog: false });
+  };
+
+  const handleSendPost = async (timestamp?: any) => {
     try {
+      handleClosePostDialog();
+
       setState({ isSendingPost: true });
 
       const channels: Array<any> = [];
@@ -125,12 +144,7 @@ export default function CreatePostContainer() {
         if (channel.platform === ChannelType.Reddit) {
           const [title, parsedPost] = state.redditPost.split("Post:");
 
-          console.log("title : ", title);
-
           [, parsedTitle] = title.split("Title: ");
-
-          console.log("parsedTitle : ", parsedTitle);
-          console.log("parsedPost : ", parsedPost);
 
           content = parsedPost;
         }
@@ -143,14 +157,18 @@ export default function CreatePostContainer() {
         });
       });
 
-      console.log("channels : ", channels);
+      let response = null;
 
-      const response = await sendPost({ channels });
+      if (timestamp) {
+        response = await schedulePost({ channels, timestamp });
+      } else {
+        response = await sendPost({ channels });
+      }
 
-      // if (response?.success) {
-      //   enqueueSnackbar(response?.message, { variant: "success" });
-      //   navigate("/posts");
-      // }
+      if (response?.success) {
+        enqueueSnackbar(response?.message, { variant: "success" });
+        navigate("/posts");
+      }
     } catch (error: any) {
       enqueueSnackbar(error?.message, { variant: "error" });
     } finally {
@@ -377,9 +395,9 @@ export default function CreatePostContainer() {
 
               <div>
                 <Button
-                  label="Send Post"
+                  label="Confirm Post"
                   color="secondary"
-                  onClick={handleSendPost}
+                  onClick={handleOpenPostDialog}
                   style={{
                     borderRadius: 4,
                     fontSize: 16,
@@ -396,6 +414,14 @@ export default function CreatePostContainer() {
             </div>
           </div>
         </div>
+      )}
+
+      {state?.shouldShowPostDialog && (
+        <PostDialog
+          open={state?.shouldShowPostDialog}
+          onClose={handleClosePostDialog}
+          onSubmit={handleSendPost}
+        />
       )}
     </div>
   );
