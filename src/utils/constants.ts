@@ -41,3 +41,9 @@ export const Channels = [
     icon: InstagramIcon,
   },
 ];
+
+export const ModelType = {
+  OpenAI: "openai",
+  Anthropic: "anthropic",
+  Custom: "custom",
+};

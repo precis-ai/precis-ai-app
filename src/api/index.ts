@@ -7,7 +7,7 @@ const getHeaders = () => ({
 
 const API = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL,
-  timeout: 30000,
+  timeout: 60000,
 });
 
 const Exception = (message: any) => {
@@ -311,12 +311,45 @@ export const sendPost = async (payload: { channels: Array<any> }) => {
   }
 };
 
+export const sendPostWithMedia = async (payload: any) => {
+  try {
+    const response = await API.post("/posts/send/media", payload, {
+      headers: { ...getHeaders(), "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
 export const schedulePost = async (payload: {
   channels: Array<any>;
   timestamp: any;
 }) => {
   try {
     const response = await API.post("/posts/schedule", payload, {
+      headers: getHeaders(),
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const generateTranscription = async (payload: any) => {
+  try {
+    const response = await API.post("/posts/transcribe", payload, {
+      headers: { ...getHeaders(), "Content-Type": "multipart/form-data" },
+    });
+    return response.data;
+  } catch (error) {
+    return processError(error);
+  }
+};
+
+export const generateImage = async (payload: { content: string }) => {
+  try {
+    const response = await API.post("/posts/image", payload, {
       headers: getHeaders(),
     });
     return response.data;

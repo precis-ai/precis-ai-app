@@ -3,6 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useSnackbar } from "notistack";
 import { FacebookShareButton, FacebookIcon } from "react-share";
 import Checkbox from "@mui/material/Checkbox";
+import Radio from "@mui/material/Radio";
+import Divider from "@mui/material/Divider";
+import AudioFileOutlinedIcon from "@mui/icons-material/AudioFileOutlined";
+import CameraAltOutlinedIcon from "@mui/icons-material/CameraAltOutlined";
 import TextField from "components/TextField";
 import Button from "components/Button";
 import ErrorMessage from "components/ErrorMessage";
@@ -11,12 +15,16 @@ import PostDialog from "components/PostDialog";
 import { useMergeState } from "utils/custom-hooks";
 import {
   createPost,
+  generateImage,
+  generateTranscription,
   getChannels,
   schedulePost,
   sendPost,
+  sendPostWithMedia,
   summarize,
 } from "api";
-import { ChannelType, Channels } from "utils/constants";
+import { ChannelType, Channels, ModelType } from "utils/constants";
+import { toBase64 } from "utils/common";
 
 export default function CreatePostContainer() {
   const { enqueueSnackbar } = useSnackbar();
@@ -34,15 +42,49 @@ export default function CreatePostContainer() {
     // content:
     //   "With Docker's release, interest in containers soared. Unlike VMs, containers use OS-level virtualization for consistency, flexibility, and portability. AWS offers various use cases for containers. #containerization #AWS #Docker #cloudcomputing    With Docker's release, interest in containers soared. Unlike VMs, containers use OS-level virtualization for consistency, flexibility, and portability. AWS offers various use cases for containers. #containerization #AWS #Docker #cloudcomputing    With Docker's release, interest in containers soared. Unlike VMs, containers use OS-level virtualization for consistency, flexibility, and portability. AWS offers various use cases for containers. #containerization #AWS #Docker #cloudcomputing    With Docker's release, interest in containers soared. Unlike VMs, containers use OS-level virtualization for consistency, flexibility, and portability. AWS offers various use cases for containers. #containerization #AWS #Docker #cloudcomputing    With Docker's release, interest in containers soared. Unlike VMs, containers use OS-level virtualization for consistency, flexibility, and portability. AWS offers various use cases for containers. #containerization #AWS #Docker #cloudcomputing    ",
 
+    description: "",
+    summary: "",
+    content: "",
+
     channels: [],
     selectedChannels: [],
+
+    selectedModel: {
+      twitter: "",
+      linkedIn: "",
+      reddit: "",
+    },
+
+    imageDescription: "",
+    imageUrl: "",
+    // "https://oaidalleapiprodscus.blob.core.windows.net/private/org-nwb17Kkic4P1q9FcCgsyraU6/user-innK9wwN2zuMBTBPD1euzgPO/img-C6jhicNjbim1u7mMRf48XJUF.png?st=2024-05-02T17%3A53%3A15Z&se=2024-05-02T19%3A53%3A15Z&sp=r&sv=2021-08-06&sr=b&rscd=inline&rsct=image/png&skoid=6aaadede-4fb3-4698-a8f6-684d7786b067&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-05-01T23%3A28%3A01Z&ske=2024-05-02T23%3A28%3A01Z&sks=b&skv=2021-08-06&sig=nWRVRUyHvdcgQT/wMfBU4fJZGuc1i6I7nJeFx0Axjw0%3D",
+    imageFile: "",
+    imagePreview: "",
+
+    twitter: {
+      openai: "",
+      anthropic: "",
+      custom: [],
+    },
+    linkedIn: {
+      openai: "",
+      anthropic: "",
+      custom: [],
+    },
+    reddit: {
+      openai: "",
+      anthropic: "",
+      custom: [],
+    },
 
     twitterPost: "",
     linkedInPost: "",
     redditPost: "",
 
+    isTranscribingDescription: false,
     isGeneratingSummary: false,
     isCreatingPost: false,
+    isGeneratingImage: false,
     isSendingPost: false,
 
     shouldShowPost: false,
@@ -59,6 +101,42 @@ export default function CreatePostContainer() {
         [event.target.name]: false,
       },
     });
+  };
+
+  const handleSelectModel = (channelType: string, selectedModel: string) => {
+    let payload = {};
+
+    if (channelType === ChannelType.Twitter) {
+      payload = {
+        twitterPost: state?.twitter[selectedModel],
+        selectedModel: {
+          ...state?.selectedModel,
+          twitter: selectedModel,
+        },
+      };
+    }
+
+    if (channelType === ChannelType.LinkedIn) {
+      payload = {
+        linkedInPost: state?.linkedIn[selectedModel],
+        selectedModel: {
+          ...state?.selectedModel,
+          linkedIn: selectedModel,
+        },
+      };
+    }
+
+    if (channelType === ChannelType.Reddit) {
+      payload = {
+        redditPost: state?.reddit[selectedModel],
+        selectedModel: {
+          ...state?.selectedModel,
+          reddit: selectedModel,
+        },
+      };
+    }
+
+    setState({ ...payload });
   };
 
   const handleSelectChannel = (channel: any) => {
@@ -101,9 +179,12 @@ export default function CreatePostContainer() {
 
       if (response?.success) {
         setState({
-          twitterPost: response?.data?.twitterPost,
-          linkedInPost: response?.data?.linkedInPost,
-          redditPost: response?.data?.redditPost,
+          twitter: response?.data?.twitter,
+          linkedIn: response?.data?.linkedIn,
+          reddit: response?.data?.reddit,
+          twitterPost: response?.data?.twitter?.openai,
+          linkedInPost: response?.data?.linkedIn?.openai,
+          redditPost: response?.data?.reddit?.openai,
         });
       }
     } catch (error: any) {
@@ -161,6 +242,11 @@ export default function CreatePostContainer() {
 
       if (timestamp) {
         response = await schedulePost({ channels, timestamp });
+      } else if (state?.imageFile) {
+        const formData = new FormData();
+        formData.append("file", state.imageFile);
+        formData.append("channels", JSON.stringify(channels));
+        response = await sendPostWithMedia(formData);
       } else {
         response = await sendPost({ channels });
       }
@@ -173,6 +259,81 @@ export default function CreatePostContainer() {
       enqueueSnackbar(error?.message, { variant: "error" });
     } finally {
       setState({ isSendingPost: false });
+    }
+  };
+
+  const transcribeDescriptionFileRef = React.useRef<any>();
+
+  const handletranscribeDescriptionFileRef = () => {
+    transcribeDescriptionFileRef.current.click();
+  };
+
+  const handleTranscribeDescription = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    try {
+      const file = event.target.files && event.target.files[0];
+
+      if (!file) {
+        return;
+      }
+
+      event.target.value = "";
+
+      setState({ isTranscribingDescription: true });
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await generateTranscription(formData);
+
+      if (response?.success) {
+        setState({ description: response?.data?.transcription });
+      }
+    } catch (error: any) {
+      enqueueSnackbar(error?.message, { variant: "error" });
+    } finally {
+      setState({ isTranscribingDescription: false });
+    }
+  };
+
+  const imageFileRef = React.useRef<any>();
+
+  const handleImageFileRef = () => {
+    imageFileRef.current.click();
+  };
+
+  const handleChangeImageFile = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files && event.target.files[0];
+
+    if (!file) {
+      return;
+    }
+
+    event.target.value = "";
+
+    const imagePreview = await toBase64(file);
+
+    setState({ imageFile: file, imagePreview });
+  };
+
+  const handleGenerateImage = async () => {
+    try {
+      setState({ isGeneratingImage: true });
+
+      const response = await generateImage({
+        content: state?.imageDescription,
+      });
+
+      if (response?.success) {
+        setState({ imagePreview: response?.data?.image });
+      }
+    } catch (error: any) {
+      enqueueSnackbar(error?.message, { variant: "error" });
+    } finally {
+      setState({ isGeneratingImage: false });
     }
   };
 
@@ -191,6 +352,20 @@ export default function CreatePostContainer() {
       setState({ isLoading: false });
     }
   };
+
+  const getImage = () => {
+    if (state?.imageUrl) {
+      return state.imageUrl;
+    }
+
+    if (state?.imagePreview) {
+      return state.imagePreview;
+    }
+
+    return "";
+  };
+
+  const image = getImage();
 
   React.useEffect(() => {
     init();
@@ -233,7 +408,7 @@ export default function CreatePostContainer() {
               </div>
             </div>
 
-            <div className="mt-8">
+            <div className="flex justify-between items-center mt-8">
               <Button
                 label="Summarize"
                 color="secondary"
@@ -248,6 +423,33 @@ export default function CreatePostContainer() {
                 loaderButton
                 loadingPosition="center"
                 loading={state?.isGeneratingSummary}
+              />
+
+              <span className="font-medium">OR</span>
+
+              <Button
+                label="Transcribe description from audio file"
+                color="info"
+                onClick={handletranscribeDescriptionFileRef}
+                style={{
+                  borderRadius: 4,
+                  fontSize: 14,
+                  color: "#FFFFFF",
+                  fontWeight: 500,
+                  height: 40,
+                }}
+                fullWidth
+                loaderButton
+                loadingPosition="center"
+                loading={state?.isTranscribingDescription}
+                startIcon={<AudioFileOutlinedIcon />}
+              />
+
+              <input
+                type="file"
+                className="hidden"
+                ref={transcribeDescriptionFileRef}
+                onChange={handleTranscribeDescription}
               />
             </div>
 
@@ -306,32 +508,284 @@ export default function CreatePostContainer() {
                       <div className="text-grey font-semibold">Post</div>
 
                       {channel?.platform === ChannelType.Twitter && (
-                        <div className="mt-4">
-                          <textarea
-                            value={state?.twitterPost}
-                            className="w-full"
-                            rows={10}
-                          />
+                        <div>
+                          {/* <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.twitter ===
+                                  ModelType.OpenAI
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.Twitter,
+                                    ModelType.OpenAI
+                                  )
+                                }
+                                value={ModelType.OpenAI}
+                              />{" "}
+                              gpt-3.5-turbo
+                            </div> */}
+
+                          <div className="mt-2">
+                            <textarea
+                              value={state?.twitter?.openai}
+                              className="w-full p-2 rounded-md"
+                              rows={10}
+                              disabled
+                            />
+                          </div>
+                          {/* </div> */}
+
+                          {/* <hr className="my-8" />
+
+                          <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.twitter ===
+                                  ModelType.Anthropic
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.Twitter,
+                                    ModelType.Anthropic
+                                  )
+                                }
+                                value={ModelType.Anthropic}
+                              />{" "}
+                              claude-3-haiku
+                            </div>
+
+                            <div className="mt-2">
+                              <textarea
+                                value={state?.twitter?.anthropic}
+                                className="w-full p-2 rounded-md"
+                                rows={10}
+                                disabled
+                              />
+                            </div>
+                          </div>
+
+                          <hr className="my-8" />
+
+                          <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.twitter ===
+                                  ModelType.Custom
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.Twitter,
+                                    ModelType.Custom
+                                  )
+                                }
+                                value={ModelType.Custom}
+                              />{" "}
+                              Custom model
+                            </div>
+
+                            {state?.twitter?.custom?.map((content: string) => (
+                              <div key={content} className="mt-2">
+                                <textarea
+                                  value={content}
+                                  className="w-full p-2 rounded-md"
+                                  rows={4}
+                                  disabled
+                                />
+                              </div>
+                            ))}
+                          </div> */}
                         </div>
                       )}
 
                       {channel?.platform === ChannelType.LinkedIn && (
-                        <div className="mt-4 w-full">
-                          <textarea
-                            value={state?.linkedInPost}
-                            className="w-full"
-                            rows={10}
-                          />
+                        <div>
+                          {/* <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.linkedIn ===
+                                  ModelType.OpenAI
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.LinkedIn,
+                                    ModelType.OpenAI
+                                  )
+                                }
+                                value={ModelType.OpenAI}
+                              />{" "}
+                              gpt-3.5-turbo
+                            </div> */}
+
+                          <div className="mt-2">
+                            <textarea
+                              value={state?.linkedIn?.openai}
+                              className="w-full p-2 rounded-md"
+                              rows={10}
+                              disabled
+                            />
+                          </div>
+                          {/* </div> */}
+
+                          {/* <hr className="my-8" />
+
+                          <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.linkedIn ===
+                                  ModelType.Anthropic
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.LinkedIn,
+                                    ModelType.Anthropic
+                                  )
+                                }
+                                value={ModelType.Anthropic}
+                              />{" "}
+                              claude-3-haiku
+                            </div>
+
+                            <div className="mt-2">
+                              <textarea
+                                value={state?.linkedIn?.anthropic}
+                                className="w-full p-2 rounded-md"
+                                rows={10}
+                                disabled
+                              />
+                            </div>
+                          </div>
+
+                          <hr className="my-8" />
+
+                          <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.linkedIn ===
+                                  ModelType.Custom
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.LinkedIn,
+                                    ModelType.Custom
+                                  )
+                                }
+                                value={ModelType.Custom}
+                              />{" "}
+                              Custom model
+                            </div>
+
+                            {state?.linkedIn?.custom?.map((content: string) => (
+                              <div key={content} className="mt-2">
+                                <textarea
+                                  value={content}
+                                  className="w-full p-2 rounded-md"
+                                  rows={4}
+                                  disabled
+                                />
+                              </div>
+                            ))}
+                          </div> */}
                         </div>
                       )}
 
                       {channel?.platform === ChannelType.Reddit && (
-                        <div className="mt-4 w-full">
-                          <textarea
-                            value={state?.redditPost}
-                            className="w-full"
-                            rows={10}
-                          />
+                        <div>
+                          {/* <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.reddit ===
+                                  ModelType.OpenAI
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.Reddit,
+                                    ModelType.OpenAI
+                                  )
+                                }
+                                value={ModelType.OpenAI}
+                              />{" "}
+                              gpt-3.5-turbo
+                            </div> */}
+
+                          <div className="mt-2">
+                            <textarea
+                              value={state?.reddit?.openai}
+                              className="w-full p-2 rounded-md"
+                              rows={10}
+                              disabled
+                            />
+                          </div>
+                          {/* </div> */}
+
+                          {/* <hr className="my-8" />
+
+                          <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.reddit ===
+                                  ModelType.Anthropic
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.Reddit,
+                                    ModelType.Anthropic
+                                  )
+                                }
+                                value={ModelType.Anthropic}
+                              />{" "}
+                              claude-3-haiku
+                            </div>
+
+                            <div className="mt-2">
+                              <textarea
+                                value={state?.reddit?.anthropic}
+                                className="w-full p-2 rounded-md"
+                                rows={10}
+                                disabled
+                              />
+                            </div>
+                          </div>
+
+                          <hr className="my-8" />
+
+                          <div className="mt-4">
+                            <div className="text-sm font-medium">
+                              <Radio
+                                checked={
+                                  state?.selectedModel?.reddit ===
+                                  ModelType.Custom
+                                }
+                                onChange={() =>
+                                  handleSelectModel(
+                                    ChannelType.Reddit,
+                                    ModelType.Custom
+                                  )
+                                }
+                                value={ModelType.Custom}
+                              />{" "}
+                              Custom model
+                            </div>
+
+                            {state?.reddit?.custom?.map((content: string) => (
+                              <div key={content} className="mt-2">
+                                <textarea
+                                  value={content}
+                                  className="w-full p-2 rounded-md"
+                                  rows={4}
+                                  disabled
+                                />
+                              </div>
+                            ))}
+                          </div> */}
                         </div>
                       )}
                     </div>
@@ -372,6 +826,95 @@ export default function CreatePostContainer() {
             <div>
               <hr className="my-8" />
 
+              <div className="text-grey font-semibold">
+                Add an image to your post (optional)
+              </div>
+
+              {/* <div className="my-4">
+                <div className="text-grey font-medium text-sm">
+                  Generate an image
+                </div>
+
+                <div className="my-2">
+                  <TextField
+                    fullWidth
+                    label="IMAGE DESCRIPTION"
+                    variant="outlined"
+                    name="imageDescription"
+                    value={state?.imageDescription}
+                    onChange={handleChange}
+                    multiline
+                    minRows={4}
+                    InputLabelProps={{
+                      shrink: true,
+                      disableAnimation: true,
+                    }}
+                    autoComplete="off"
+                  />
+                </div>
+
+                <div className="my-4">
+                  <Button
+                    label="Generate Image"
+                    color="info"
+                    onClick={handleGenerateImage}
+                    style={{
+                      borderRadius: 4,
+                      fontSize: 14,
+                      color: "#FFFFFF",
+                      fontWeight: 500,
+                      height: 40,
+                    }}
+                    fullWidth
+                    loaderButton
+                    loadingPosition="center"
+                    loading={state?.isGeneratingImage}
+                  />
+                </div>
+              </div> */}
+
+              {/* <Divider>OR</Divider> */}
+
+              <div className="my-4">
+                {/* <div className="text-grey font-medium text-sm">
+                  Upload your own image
+                </div> */}
+
+                <div className="my-2">
+                  <Button
+                    label="Upload image"
+                    color="info"
+                    onClick={handleImageFileRef}
+                    style={{
+                      borderRadius: 4,
+                      fontSize: 14,
+                      color: "#FFFFFF",
+                      fontWeight: 500,
+                      height: 40,
+                    }}
+                    fullWidth
+                    startIcon={<CameraAltOutlinedIcon />}
+                  />
+
+                  <input
+                    type="file"
+                    className="hidden"
+                    ref={imageFileRef}
+                    onChange={handleChangeImageFile}
+                  />
+                </div>
+              </div>
+
+              {image && (
+                <div className="bg-white border-[1px] rounded-lg border-solid border-[#f1f1f1] shadow-md p-5 my-8 w-[400px] h-[400px]">
+                  <img className="rounded-md" src={image} />
+                </div>
+              )}
+            </div>
+
+            <div>
+              <hr className="my-8" />
+
               {state?.summary && (
                 <div className="my-4">
                   <Button
@@ -393,24 +936,26 @@ export default function CreatePostContainer() {
                 </div>
               )}
 
-              <div>
-                <Button
-                  label="Confirm Post"
-                  color="secondary"
-                  onClick={handleOpenPostDialog}
-                  style={{
-                    borderRadius: 4,
-                    fontSize: 16,
-                    color: "#FFFFFF",
-                    fontWeight: 500,
-                    height: 50,
-                  }}
-                  fullWidth
-                  loaderButton
-                  loadingPosition="center"
-                  loading={state?.isSendingPost}
-                />
-              </div>
+              {state?.shouldShowPost && (
+                <div>
+                  <Button
+                    label="Confirm Post"
+                    color="secondary"
+                    onClick={handleOpenPostDialog}
+                    style={{
+                      borderRadius: 4,
+                      fontSize: 16,
+                      color: "#FFFFFF",
+                      fontWeight: 500,
+                      height: 50,
+                    }}
+                    fullWidth
+                    loaderButton
+                    loadingPosition="center"
+                    loading={state?.isSendingPost}
+                  />
+                </div>
+              )}
             </div>
           </div>
         </div>
