@@ -13,7 +13,7 @@ app.use(express.static(publicDir));
 app.use(
   "/v1",
   createProxyMiddleware({
-    target: "http://localhost:7000",
+    target: "http://localhost:7000/v1",
     changeOrigin: true,
   })
 );
