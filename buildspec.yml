@@ -9,14 +9,14 @@ env:
 phases:
   install:
     runtime-versions:
-      nodejs: 14
+      nodejs: 20
     commands:
       - echo Installing project dependencies...
-      - npm install
+      - yarn install
   build:
     commands:
       - echo Initiating build...
-      - npm run build
+      - yarn build
   post_build:
     commands:
       - echo Build completed on `date`
