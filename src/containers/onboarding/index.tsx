@@ -99,7 +99,7 @@ export default function OnboardingContainer() {
 
   return (
     <div className="w-full min-h-screen flex flex-col justify-center items-center bg-red-light">
-      <div className="bg-white opacity-90 rounded-lg w-11/12 md:w-3/5 lg:w-2/5 pt-5 pb-10 px-10 md:px-12 flex items-center my-10">
+      <div className="bg-white opacity-90 rounded-lg w-11/12 md:w-3/5 lg:w-3/5 pt-5 pb-10 px-10 md:px-12 flex items-center my-10">
         <div className="w-full">
           {state?.step === OnboardingStep.business_details && (
             <div>
@@ -149,6 +149,9 @@ export default function OnboardingContainer() {
                 <span> helps</span>{" "}
                 <input
                   className="border border-[#f1f1f1] rounded-md px-2"
+                  style={{
+                    minWidth: `${String(readContent(0)).length}ch`,
+                  }}
                   value={readContent(0)}
                   onChange={(event: any) =>
                     handleChangeContent(event?.target?.value, 0)
@@ -158,6 +161,9 @@ export default function OnboardingContainer() {
                 <input
                   className="border border-[#f1f1f1] rounded-md px-2"
                   value={readContent(1)}
+                  style={{
+                    minWidth: `${String(readContent(1)).length}ch`,
+                  }}
                   onChange={(event: any) =>
                     handleChangeContent(event?.target?.value, 1)
                   }
@@ -166,6 +172,9 @@ export default function OnboardingContainer() {
                 <input
                   className="border border-[#f1f1f1] rounded-md mt-4 px-2"
                   value={readContent(2)}
+                  style={{
+                    minWidth: `${String(readContent(2)).length}ch`,
+                  }}
                   onChange={(event: any) =>
                     handleChangeContent(event?.target?.value, 2)
                   }
@@ -174,6 +183,9 @@ export default function OnboardingContainer() {
                 <input
                   className="border border-[#f1f1f1] rounded-md mt-4 px-2"
                   value={readContent(3)}
+                  style={{
+                    minWidth: `${String(readContent(3)).length}ch`,
+                  }}
                   onChange={(event: any) =>
                     handleChangeContent(event?.target?.value, 3)
                   }
@@ -186,6 +198,9 @@ export default function OnboardingContainer() {
                 <input
                   className="border border-[#f1f1f1] rounded-md px-2"
                   value={readContent(4)}
+                  style={{
+                    minWidth: `${String(readContent(4)).length}ch`,
+                  }}
                   onChange={(event: any) =>
                     handleChangeContent(event?.target?.value, 4)
                   }
