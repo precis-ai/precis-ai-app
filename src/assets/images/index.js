@@ -1,7 +1,7 @@
-import Nihal from "./nihal.jpeg";
+import Logo from "./logo.jpeg";
 
 const Images = {
-  Nihal,
+  Logo,
 };
 
 export default Images;

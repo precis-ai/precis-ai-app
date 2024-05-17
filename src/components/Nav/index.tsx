@@ -13,6 +13,7 @@ import BuildOutlinedIcon from "@mui/icons-material/BuildOutlined";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useMergeState } from "utils/custom-hooks";
+import Images from "assets/images";
 
 export const NAVS = [
   {
@@ -192,8 +193,8 @@ export default function Nav({ isLoggedIn, user, onLogout }: Props) {
       <div className="flex">
         <div className="w-16 max-w-[80px] flex flex-col justify-between">
           <div className="flex flex-col items-center">
-            <div className="h-10 w-10 rounded-md mt-6 text-3xl font-semibold bg-primary text-white flex justify-center items-center">
-              P
+            <div className="h-10 w-10 mt-6">
+              <img src={Images.Logo} className="rounded-md" />
             </div>
 
             <div className="w-full flex flex-col items-center my-6">
