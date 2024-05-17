@@ -1,11 +1,25 @@
-# precis-ai-app
+# Precis AI App
 
-All things frontend!
+All things frontend for Precis AI web application!
 
-### Steps to run
+## Installation
 
-1. `nvm use`
+Install [nvm](https://github.com/nvm-sh/nvm)
 
-2. `yarn`
+```bash
+$ nvm use
+```
 
-3. `yarn start`
+```bash
+$ yarn
+```
+
+## Setup
+
+Add necessary environment variables, check out `.env.example` file
+
+## Steps to run
+
+```bash
+$ yarn start
+```
